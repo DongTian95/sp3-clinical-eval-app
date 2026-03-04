@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="breadcrumbs">
+    <a href="/queue">← Back to queue</a>
+  </div>
+
+  <h1>Case {{ case.id }}: {{ case.title }}</h1>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Clinical prompt</h2>
+      <pre class="prompt">{{ case.clinical_prompt }}</pre>
+
+      <h2 style="margin-top: 18px;">Images</h2>
+      {% if case.images|length == 0 %}
+        <p class="muted">No images for this case.</p>
+      {% else %}
+        <div class="image-grid">
+          {% for img in case.images %}
+            <figure class="image-card">
+              <img src="/static/{{ img.image_path }}" alt="Case image" />
+              {% if img.caption %}
+                <figcaption class="muted">{{ img.caption }}</figcaption>
+              {% endif %}
+            </figure>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="actions-row">
+        <a class="button tertiary" href="/cases/{{ case.id }}/compare">Pairwise compare this case</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Submit structured feedback</h2>
+      <p class="muted">
+        Rate each output, then pick the best overall. Submitting again will overwrite your previous scores for this case.
+      </p>
+
+      <form method="post" action="/cases/{{ case.id }}/submit">
+        <h3>Best overall output</h3>
+        <div class="radio-list">
+          {% for out in outputs %}
+            <label class="radio-item">
+              <input type="radio" name="best_output_id" value="{{ out.id }}"
+                {% if existing_overall and existing_overall.best_output_id == out.id %}checked{% endif %}
+                {% if (not existing_overall) and loop.first %}checked{% endif %}
+              />
+              <span><strong>{{ out.model_name }}</strong> (Output {{ out.id }})</span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <div class="subsection">
+          <label>Why is it better? (optional)</label>
+          <div class="checkbox-grid">
+            {% for tag in preference_reason_options %}
+              <label class="checkbox-item">
+                <input type="checkbox" name="preference_tags" value="{{ tag }}"
+                  {% if existing_overall and (tag in existing_overall.rationale_tags.get("tags", [])) %}checked{% endif %}
+                />
+                <span>{{ tag }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+          <label for="overall_comment">Overall comment (optional)</label>
+          <textarea id="overall_comment" name="overall_comment" rows="3"
+            placeholder="Anything notable (errors, safety concerns, preferred style, etc.)"
+          >{% if existing_overall %}{{ existing_overall.overall_comment }}{% endif %}</textarea>
+        </div>
+
+        <hr />
+
+        <h3>Per-output ratings</h3>
+        {% for out in outputs %}
+          {% set ev = existing_per_output.get(out.id) %}
+          <div class="output-block">
+            <div class="output-header">
+              <div>
+                <div class="output-title">{{ out.model_name }}</div>
+                <div class="muted">Output ID: {{ out.id }}</div>
+              </div>
+            </div>
+
+            <pre class="output-text">{{ out.output_text }}</pre>
+
+            <div class="grid-3">
+              <div>
+                <label>Accuracy (1-5)</label>
+                <input type="number" min="1" max="5" name="accuracy_{{ out.id }}"
+                  value="{{ ev.accuracy if ev else 3 }}" required />
+              </div>
+              <div>
+                <label>Completeness (1-5)</label>
+                <input type="number" min="1" max="5" name="completeness_{{ out.id }}"
+                  value="{{ ev.completeness if ev else 3 }}" required />
+              </div>
+              <div>
+                <label>Readability (1-5)</label>
+                <input type="number" min="1" max="5" name="readability_{{ out.id }}"
+                  value="{{ ev.readability if ev else 3 }}" required />
+              </div>
+            </div>
+
+            <div class="subsection">
+              <label>Issue tags (optional)</label>
+              <div class="checkbox-grid">
+                {% for tag in issue_options %}
+                  <label class="checkbox-item">
+                    <input type="checkbox" name="issues_{{ out.id }}" value="{{ tag }}"
+                      {% if ev and (tag in ev.issue_tags.get("tags", [])) %}checked{% endif %}
+                    />
+                    <span>{{ tag }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+
+              <label>Suggested correction (optional)</label>
+              <textarea name="correction_{{ out.id }}" rows="3"
+                placeholder="If you would edit the report, paste a corrected sentence/section here."
+              >{% if ev %}{{ ev.suggested_correction }}{% endif %}</textarea>
+
+              <label>Comment (optional)</label>
+              <textarea name="comment_{{ out.id }}" rows="2"
+                placeholder="Any additional notes about this output."
+              >{% if ev %}{{ ev.comment }}{% endif %}</textarea>
+            </div>
+          </div>
+        {% endfor %}
+
+        <div class="actions-row">
+          <button type="submit">Save feedback</button>
+          <a class="button secondary" href="/queue">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Case queue</h1>
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>Your progress</h2>
+      <p><strong>{{ total_completed }}</strong> / {{ total_cases }} cases completed.</p>
+      {% if next_case %}
+        <a class="button" href="/cases/{{ next_case.id }}">Continue with next case →</a>
+      {% else %}
+        <div class="badge good">All cases completed 🎉</div>
+      {% endif %}
+      <p class="muted" style="margin-top: 12px;">
+        Tip: open a case and use <em>Pairwise compare</em> for side-by-side preference labels.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>How to annotate</h2>
+      <ol>
+        <li>Read the clinical prompt + view images</li>
+        <li>Score each output (accuracy, completeness, readability)</li>
+        <li>Select the best overall output + rationale</li>
+        <li>Optionally suggest a correction</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Cases</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Title</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in cases %}
+          <tr>
+            <td>{{ c.id }}</td>
+            <td>{{ c.title }}</td>
+            <td>
+              {% if c.id in completed_case_ids %}
+                <span class="badge good">Completed</span>
+              {% else %}
+                <span class="badge">Pending</span>
+              {% endif %}
+            </td>
+            <td style="text-align: right;">
+              <a class="button secondary" href="/cases/{{ c.id }}">Open</a>
+              <a class="button tertiary" href="/cases/{{ c.id }}/compare">Pairwise compare</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

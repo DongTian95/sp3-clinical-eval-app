@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ title if title else "Clinical Model Evaluation" }}</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-title">Clinical Model Evaluation</div>
+        <div class="brand-subtitle">Mock multimodal outputs • structured feedback</div>
+      </div>
+      <nav class="nav">
+        {% if user %}
+          <a href="/queue">Queue</a>
+          <a href="/admin">Admin</a>
+          <span class="nav-user">Signed in as <strong>{{ user }}</strong></span>
+          <a class="nav-logout" href="/logout">Logout</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer container">
+    <div>
+      Demo app • Synthetic cases • Not for clinical use
+    </div>
+  </footer>
+</body>
+</html>

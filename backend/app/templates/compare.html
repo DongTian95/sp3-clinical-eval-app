@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="breadcrumbs">
+    <a href="/cases/{{ case.id }}">← Back to case</a>
+  </div>
+
+  <h1>Pairwise comparison: Case {{ case.id }}</h1>
+  <p class="muted">
+    Pick the better output (A vs B). This creates a preference label useful for DPO / RLHF-style training.
+  </p>
+
+  <form method="post" action="/cases/{{ case.id }}/compare/submit">
+    <input type="hidden" name="out_a_id" value="{{ out_a.id }}" />
+    <input type="hidden" name="out_b_id" value="{{ out_b.id }}" />
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="output-header">
+          <div>
+            <div class="output-title">A — {{ out_a.model_name }}</div>
+            <div class="muted">Output ID: {{ out_a.id }}</div>
+          </div>
+        </div>
+        <pre class="output-text">{{ out_a.output_text }}</pre>
+      </div>
+
+      <div class="card">
+        <div class="output-header">
+          <div>
+            <div class="output-title">B — {{ out_b.model_name }}</div>
+            <div class="muted">Output ID: {{ out_b.id }}</div>
+          </div>
+        </div>
+        <pre class="output-text">{{ out_b.output_text }}</pre>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Which is better?</h2>
+      <div class="radio-list">
+        <label class="radio-item">
+          <input type="radio" name="winner" value="a" required />
+          <span>A is better</span>
+        </label>
+        <label class="radio-item">
+          <input type="radio" name="winner" value="b" required />
+          <span>B is better</span>
+        </label>
+      </div>
+
+      <div class="subsection">
+        <label>Reason tags (optional)</label>
+        <div class="checkbox-grid">
+          {% for tag in reason_options %}
+            <label class="checkbox-item">
+              <input type="checkbox" name="reason_tags" value="{{ tag }}" />
+              <span>{{ tag }}</span>
+            </label>
+          {% endfor %}
+        </div>
+
+        <label>Comment (optional)</label>
+        <textarea name="comment" rows="3"
+          placeholder="Why did you choose this one? Any safety-critical issue?"
+        ></textarea>
+      </div>
+
+      <div class="actions-row">
+        <button type="submit">Save comparison</button>
+        <a class="button secondary" href="/cases/{{ case.id }}">Cancel</a>
+      </div>
+    </div>
+  </form>
+{% endblock %}

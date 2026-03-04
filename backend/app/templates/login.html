@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="card">
+    <h1>Login</h1>
+    <p class="muted">Demo-only: enter a name (no password). This is only used to attribute annotations.</p>
+
+    {% if error %}
+      <div class="alert">{{ error }}</div>
+    {% endif %}
+
+    <form method="post">
+      <label for="user">Your name</label>
+      <input id="user" name="user" placeholder="e.g., dr_schmidt" required />
+
+      <button type="submit">Continue</button>
+    </form>
+  </div>
+{% endblock %}

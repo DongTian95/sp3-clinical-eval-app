@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block content %}
+  <h1>Admin dashboard</h1>
+  <p class="muted">This is a lightweight demo dashboard (progress + basic data quality signals).</p>
+
+  <div class="grid-3">
+    <div class="card">
+      <div class="kpi">
+        <div class="kpi-label">Cases</div>
+        <div class="kpi-value">{{ stats.cases }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div class="kpi-label">Per-output evals</div>
+        <div class="kpi-value">{{ stats.per_output_evals }}</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="kpi">
+        <div class="kpi-label">Pairwise comps</div>
+        <div class="kpi-value">{{ stats.pairwise }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Annotator activity</h2>
+    {% if annotator_rows|length == 0 %}
+      <p class="muted">No annotations yet.</p>
+    {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th>Annotator</th>
+            <th>Cases completed</th>
+            <th>Per-output evals</th>
+            <th>Pairwise comps</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in annotator_rows %}
+            <tr>
+              <td>{{ r.annotator }}</td>
+              <td>{{ r.cases_done }}</td>
+              <td>{{ r.per_output }}</td>
+              <td>{{ r.pairwise }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h2>Inter-annotator agreement (pairwise)</h2>
+    <p class="muted">
+      For each case + output pair: agreement = fraction of votes for the majority winner (only shown when ≥2 votes exist).
+    </p>
+    {% if agreement_rows|length == 0 %}
+      <p class="muted">No multi-rater comparisons yet.</p>
+    {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th>Case</th>
+            <th>Pair</th>
+            <th>N</th>
+            <th>Agreement</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in agreement_rows %}
+            <tr>
+              <td>{{ r.case_id }}</td>
+              <td>{{ r.pair }}</td>
+              <td>{{ r.n }}</td>
+              <td>{{ r.agreement }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+{% endblock %}
