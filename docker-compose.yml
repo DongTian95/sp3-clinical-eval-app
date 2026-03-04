@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  web:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_PATH=/data/app.db
+      - SECRET_KEY=dev-secret-change-me
+      - ADMIN_USERS=admin
+    volumes:
+      - eval-data:/data
+    restart: unless-stopped
+
+volumes:
+  eval-data:
